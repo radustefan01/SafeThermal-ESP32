@@ -1,0 +1,50 @@
+{
+  "name": "Dual Op-amp",
+  "author": "David Forrest",
+  "pins": [
+    "OUTA",
+    "INA-",
+    "INA+",
+    "GND",
+    "INB+",
+    "INB-",
+    "OUTB",
+    "VCC"
+  
+  ],
+  "controls": [
+    {
+      "id": "gainA",
+      "label": "gainA",
+      "type": "range",
+      "min": 0,
+      "max": 5,
+      "step": 0.1
+    },
+        {
+      "id": "offsetA",
+      "label": "offsetA",
+      "type": "range",
+      "min": 0,
+      "max": 5,
+      "step": 0.1
+    },
+
+    {
+      "id": "gainB",
+      "label": "gainB",
+      "type": "range",
+      "min": 0,
+      "max": 5,
+      "step": 0.1
+    },
+        {
+      "id": "offsetB",
+      "label": "offsetB",
+      "type": "range",
+      "min": 0,
+      "max": 5,
+      "step": 0.1
+    }
+  ]
+}

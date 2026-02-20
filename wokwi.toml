@@ -1,0 +1,8 @@
+[wokwi]
+version = 1
+firmware = './build/sketch.ino.bin'
+elf = 'path-to-your-firmware.elf'
+
+[[chip]]
+name = "dual-opamp"
+binary = "dual-opamp.chip.wasm"
