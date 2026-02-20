@@ -1,27 +1,17 @@
-# Makefile for Arduino CLI compilation
-# Assumes sketch.ino is in the sketch/ folder
-
-# Configuration
 SKETCH_DIR = sketch
 SKETCH_FILE = $(SKETCH_DIR)/sketch.ino
 FQBN = esp32:esp32:esp32
 BUILD_DIR = build
 
-# Arduino CLI command (assumes it's in PATH or specify full path)
 ARDUINO_CLI = ./arduino-cli
-# Or use this if arduino-cli is in your PATH:
-# ARDUINO_CLI = arduino-cli
 
-# Colors for pretty output
 RED = \033[0;31m
 GREEN = \033[0;32m
 YELLOW = \033[1;33m
 NC = \033[0m # No Color
 
-# Default target
 all: compile
 
-# Check if arduino-cli is available
 check-cli:
 	@command -v $(ARDUINO_CLI) >/dev/null 2>&1 || { \
 		echo "$(RED)Error: arduino-cli not found!$(NC)"; \
@@ -51,7 +41,6 @@ compile: check-core $(BUILD_DIR)
 	@echo "$(GREEN)Compilation successful!$(NC)"
 	@echo "Output files in: $(BUILD_DIR)/"
 
-# Compile with verbose output
 verbose: check-core
 	$(ARDUINO_CLI) compile \
 		--fqbn $(FQBN) \
@@ -59,7 +48,6 @@ verbose: check-core
 		--build-path $(BUILD_DIR) \
 		$(SKETCH_DIR)
 
-# Clean build artifacts
 clean:
 	@echo "$(YELLOW)Cleaning build directory...$(NC)"
 	rm -rf $(BUILD_DIR)

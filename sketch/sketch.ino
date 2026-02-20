@@ -15,7 +15,7 @@
 
 volatile bool systemSafe = true;
 float currentTemp = 0.0;
-float targetTemp = 80.0;        
+float targetTemp = 45.0;        
 int heaterPWM = 0;
 
 // PID Variables
@@ -54,9 +54,9 @@ float readTemperature() {
   return 1.0 / (log(1.0 / (4095.0 / rawADC - 1.0)) / 3950.0 + 1.0 / 298.15) - 273.15;
 }
 
+// Core 1
 void TaskPID(void *pvParameters) {
   for (;;) {
-    // RUN THE SMART SPIN: If unsafe, this function "traps" the CPU here
     handleSafetySpin();
 
     // NORMAL OPERATION: Reached only if systemSafe == true
@@ -75,20 +75,20 @@ void TaskPID(void *pvParameters) {
     digitalWrite(HEATER_PIN, (heaterPWM > 0) ? HIGH : LOW);
 
     // Optimized Serial Print
-    Serial.printf("Temp: %.2f°C | Target: %.2f°C | Power: %d\n\r", 
-                  currentTemp, targetTemp, map(heaterPWM, 0, 255, 0, 100));
+    Serial.printf("Temp: %.2f°C | Target: %.2f°C\n\r", 
+                  currentTemp, targetTemp);
 
     vTaskDelay(100 / portTICK_PERIOD_MS);
   }
 }
 
-// --- 3. Task 2: Shift Register Dashboard (Runs on Core 0) ---
+// Core 0
 void TaskDashboard(void *pvParameters) {
   for (;;) {
     byte statusByte = 0;
 
     if (systemSafe) {
-      statusByte |= (1 << 7); // Bit 7: Green "SAFE" indicator ON
+      statusByte |= (1 << 7); // Bit 7: "SAFE" indicator ON
      
       // Temperature Bar Graph (Bits 0-4)
       if (currentTemp > 20) statusByte |= (1 << 0);
@@ -97,14 +97,13 @@ void TaskDashboard(void *pvParameters) {
       if (currentTemp > 40) statusByte |= (1 << 3);
       if (currentTemp > 45) statusByte |= (1 << 4);
 
-      // LED 5 (The "Heater Active" Indicator)
       if (heaterPWM > 0) {
         statusByte |= (1 << 5);
       }
      
     }
     else {
-      statusByte |= (1 << 6); // Bit 6: Red "FAULT" indicator ON
+      statusByte |= (1 << 6);
     }
 
     // Shift data to 74HC595
@@ -116,14 +115,13 @@ void TaskDashboard(void *pvParameters) {
   }
 }
 
-// --- 4. Main Setup ---
 void setup() {
   Serial.begin(115200);
   analogReadResolution(12);
 
   // Initialize LED pin
   pinMode(HEATER_PIN, OUTPUT);
-  digitalWrite(HEATER_PIN, LOW); // Start with LED off
+  digitalWrite(HEATER_PIN, LOW);
 
   // Init Shift Register Pins
   pinMode(LATCH_PIN, OUTPUT);
