@@ -6,9 +6,8 @@
 #include <freertos/task.h>
 
 #define NTC_PIN 34
-#define INTERLOCK_PIN 19
-#define HEATER_PIN 2       // LED on pin 2
-
+#define HEATER_PIN 2
+// shift register pins
 #define LATCH_PIN 5
 #define CLOCK_PIN 18
 #define DATA_PIN 23
@@ -40,7 +39,7 @@ void handleSafetySpin() {
 
     vTaskDelay(1 / portTICK_PERIOD_MS); 
     currentTemp = readTemperature(); 
-    if (digitalRead(INTERLOCK_PIN) == HIGH && currentTemp < 55.0) {
+    if (currentTemp < 55.0) {
       systemSafe = true;
       Serial.println(">>> SAFETY RESTORED: Resuming PID control...");
     }
@@ -56,51 +55,46 @@ float readTemperature() {
 
 // Core 1
 void TaskPID(void *pvParameters) {
-  for (;;) {
+  while (1) {
     handleSafetySpin();
-
-    // NORMAL OPERATION: Reached only if systemSafe == true
     currentTemp = readTemperature();
     
     // PID Math
     float error = targetTemp - currentTemp;
     integral += error;
+
+    // cap integral
+    if (integral > 255) integral = 255;
+    if (integral < -255) integral = -255;
+
     float derivative = error - previousError;
     float output = (Kp * error) + (Ki * integral) + (Kd * derivative);
     previousError = error;
     heaterPWM = constrain((int)output, 0, 255);
 
     // Logic: Power the LED (Heater) based on PID but gated by the safety
-    // In your specific 'Relay-less' circuit, we use Pin 2 HIGH to enable
-    digitalWrite(HEATER_PIN, (heaterPWM > 0) ? HIGH : LOW);
+    if (systemSafe) {
+    analogWrite(HEATER_PIN, heaterPWM); 
+    }
 
     // Optimized Serial Print
-    Serial.printf("Temp: %.2f°C | Target: %.2f°C\n\r", 
-                  currentTemp, targetTemp);
-
+    Serial.printf("Temp: %.2f°C | Target: %.2f°C\n\r", currentTemp, targetTemp);
     vTaskDelay(100 / portTICK_PERIOD_MS);
   }
 }
 
 // Core 0
 void TaskDashboard(void *pvParameters) {
-  for (;;) {
+  while (1) {
     byte statusByte = 0;
 
     if (systemSafe) {
-      statusByte |= (1 << 7); // Bit 7: "SAFE" indicator ON
-     
       // Temperature Bar Graph (Bits 0-4)
       if (currentTemp > 20) statusByte |= (1 << 0);
       if (currentTemp > 30) statusByte |= (1 << 1);
       if (currentTemp > 35) statusByte |= (1 << 2);
       if (currentTemp > 40) statusByte |= (1 << 3);
       if (currentTemp > 45) statusByte |= (1 << 4);
-
-      if (heaterPWM > 0) {
-        statusByte |= (1 << 5);
-      }
-     
     }
     else {
       statusByte |= (1 << 6);
@@ -127,16 +121,10 @@ void setup() {
   pinMode(LATCH_PIN, OUTPUT);
   pinMode(CLOCK_PIN, OUTPUT);
   pinMode(DATA_PIN, OUTPUT);
- 
-  // Init Interlock Input
-  pinMode(INTERLOCK_PIN, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(INTERLOCK_PIN), triggerInterlock, FALLING);
 
   // Spin up the Dual-Core Tasks
   xTaskCreatePinnedToCore(TaskDashboard, "Dashboard", 2048, NULL, 1, NULL, 0);
   xTaskCreatePinnedToCore(TaskPID, "PID_Loop", 2048, NULL, 2, NULL, 1);
 }
 
-void loop() {
-  // Empty - FreeRTOS handles everything
-}
+void loop() {}

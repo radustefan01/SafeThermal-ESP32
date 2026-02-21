@@ -3,13 +3,6 @@
   "author": "Anonymous maker",
   "editor": "wokwi",
   "parts": [
-    {
-      "type": "wokwi-led",
-      "id": "dummy_load",
-      "top": -291.6,
-      "left": 157.4,
-      "attrs": { "color": "blue" }
-    },
     { "type": "wokwi-breadboard", "id": "bb1", "top": 73.8, "left": 31.6, "attrs": {} },
     {
       "type": "board-esp32-devkit-c-v4",
@@ -28,18 +21,19 @@
     },
     { "type": "wokwi-74hc595", "id": "sr1", "top": 392.4, "left": 139.84, "attrs": {} },
     {
-      "type": "wokwi-pushbutton",
-      "id": "btn1",
-      "top": 284.6,
-      "left": -144,
-      "attrs": { "color": "green", "xray": "1" }
-    },
-    {
       "type": "wokwi-led-bar-graph",
       "id": "bargraph2",
       "top": 360,
       "left": 350.4,
       "attrs": { "color": "GYR" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led1",
+      "top": 97.6,
+      "left": -43.8,
+      "rotate": 180,
+      "attrs": { "color": "red" }
     }
   ],
   "connections": [
@@ -62,8 +56,6 @@
     [ "sr1:Q2", "bargraph2:A3", "white", [ "v19.2", "h105.6", "v-57.6" ] ],
     [ "sr1:Q3", "bargraph2:A4", "white", [ "v28.8", "h105.6", "v-57.6" ] ],
     [ "sr1:Q4", "bargraph2:A5", "white", [ "v38.4", "h105.6", "v-57.6" ] ],
-    [ "sr1:Q5", "bargraph2:A6", "white", [ "v48", "h105.6", "v-57.6" ] ],
-    [ "sr1:Q7", "bargraph2:A8", "green", [ "v76.8", "h105.6", "v-67.2", "h48" ] ],
     [ "bargraph2:C10", "bargraph2:C9", "black", [ "h0" ] ],
     [ "bargraph2:C9", "bargraph2:C8", "black", [ "h0" ] ],
     [ "bargraph2:C8", "bargraph2:C7", "black", [ "h0" ] ],
@@ -74,12 +66,11 @@
     [ "bargraph2:C3", "bargraph2:C2", "black", [ "h0" ] ],
     [ "bargraph2:C2", "bargraph2:C1", "black", [ "h0" ] ],
     [ "bargraph2:C1", "bb1:bn.28", "black", [ "v0" ] ],
-    [ "sr1:Q6", "bargraph2:A10", "red", [ "v86.4", "h124.8", "v-57.6", "h9.6" ] ],
-    [ "btn1:2.l", "bb1:bn.5", "black", [ "h-19.2", "v19.4", "h124.8", "v-9.6", "h153.6" ] ],
     [ "bb1:bp.50", "bb1:tp.50", "red", [ "v0" ] ],
     [ "bb1:tn.49", "bb1:bn.49", "black", [ "v0" ] ],
-    [ "dummy_load:C", "bb1:tn.10", "green", [ "v0" ] ],
-    [ "esp:2", "dummy_load:A", "green", [ "h-38.4", "v-86.4", "h403.2", "v-9.6" ] ]
+    [ "sr1:Q6", "bargraph2:A10", "red", [ "v48", "h96", "v-19.2", "h76.8" ] ],
+    [ "led1:A", "esp:2", "green", [ "v-76.8", "h-153.6", "v57.6" ] ],
+    [ "led1:C", "bb1:tn.1", "black", [ "v0" ] ]
   ],
   "dependencies": {}
 }
